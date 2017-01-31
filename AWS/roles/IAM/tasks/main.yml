@@ -1,0 +1,15 @@
+# tasks file for IAM
+---
+    - name: create IAM webserver_role
+      iam:
+        iam_type: role
+        name: webserver_role
+        state: present
+
+    - name: Assign a policy called S3ReadOnly to the webserver_role
+      iam_policy:
+        iam_type: role
+        iam_name: webserver_role
+        policy_name: S3ReadOnly
+        state: present
+        policy_document: roles/IAM/files/iam_policy_s3_read.json

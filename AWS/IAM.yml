@@ -1,0 +1,5 @@
+---
+- name: Bla
+  hosts: localhost
+  roles:
+  - IAM

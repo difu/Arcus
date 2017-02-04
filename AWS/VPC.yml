@@ -1,0 +1,5 @@
+---
+- name: VPC_Install
+  hosts: localhost
+  roles:
+  - VPC

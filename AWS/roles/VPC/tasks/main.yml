@@ -15,7 +15,7 @@
     module: ec2_vpc
     region: "{{ region }}"
     cidr_block: 10.0.0.0/16
-    resource_tags: '{"Name":"staging_vpc"}'
+    resource_tags: '{"Name":"{{ vpc_name }}"}'
 
   register: out
 
@@ -171,7 +171,7 @@
 
 - name: Create Main Security Group
   ec2_group:
-    name: "External SSH Access"
+    name: "{{ sec_group_ssh }}"
     description: "External SSH Access"
     vpc_id: "{{ vpc_id }}"
     region: "{{ region }}"
@@ -188,7 +188,7 @@
 
 - name: Create Private Security Group
   ec2_group:
-    name: "Private Instances SG"
+    name: "{{ sec_group_private }}"
     description: "Private Instances SG"
     vpc_id: "{{ vpc_id }}"
     region: "{{ region }}"
@@ -197,3 +197,23 @@
         from_port: "22"
         to_port: "22"
         group_id: "{{ main_sg_id }}"
+
+- name: Create web security group
+  ec2_group:
+    region: "{{ region }}"
+    name: "{{ sec_group_webserver }}"
+    vpc_id: "{{ vpc_id }}"
+    description: "security group for webserver hosts"
+    rules:
+      # allow http access from anywhere
+      - proto: "tcp"
+        from_port: "80"
+        to_port: "80"
+        cidr_ip: "0.0.0.0/0"
+      - proto: "tcp"
+        from_port: "22"
+        to_port: "22"
+        group_id: "{{ main_sg_id }}"
+    rules_egress:
+      - proto: all
+        cidr_ip: "0.0.0.0/0"

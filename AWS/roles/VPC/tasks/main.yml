@@ -14,7 +14,7 @@
   local_action:
     module: ec2_vpc
     region: "{{ region }}"
-    cidr_block: 10.0.0.0/16
+    cidr_block: "{{ vpc_cidr_block }}"
     resource_tags: '{"Name":"{{ vpc_name }}"}'
 
   register: out

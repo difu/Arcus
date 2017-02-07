@@ -1,0 +1,5 @@
+---
+- name: Generate_keypair
+  hosts: localhost
+  roles:
+  - keypair

@@ -1,0 +1,2 @@
+---
+ keyname: "{{ region }}_KP"

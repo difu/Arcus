@@ -1,0 +1,19 @@
+ansible_ssh_private_key_file: ~/.ssh/eu-central-1_KP.pem
+ansible_user: ec2-user
+region: eu-central-1
+environment_prefix: devel
+
+sec_group_webserver: sg_webserver
+num_of_webservers: 1
+
+sec_group_ssh: sg_ssh
+
+sec_group_private: sg_private
+
+# VPC Information
+vpc_name:       "ARCUS_VPC"
+vpc_cidr_block: "10.0.0.0/16"
+
+# Subnets
+public_subnet_1_cidr:  "10.0.0.0/24"
+private_subnet_1_cidr: "10.0.1.0/24"

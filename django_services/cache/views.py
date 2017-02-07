@@ -40,3 +40,27 @@ def get_resource(request, filename):
     else:
         response = response_from_file(full_path)
     return response
+
+
+def wcs(request):
+    """Entry point for a WCS request."""
+    service = request.GET["service"]
+    version = request.GET["version"]
+    req_type = request.GET["request"]
+    id_list = request.GET.getlist("id")
+    subsets = {}
+    for x in request.GET.keys():
+       if x.startswith("subset"):
+            subsets[x] = request.GET[x]
+    assert(service.lower() == "wcs" and req_type.lower() == "getcoverage")
+
+    response = """
+    Service: {s} <br>
+    Version: {v} <br>
+    Request: {r} <br>
+    Layer IDs: {i} <br>
+    Subsets: {sub}
+    """.format(s=service, v=version, r=req_type, i=id_list, sub=subsets)
+
+    return HttpResponse(response)
+

@@ -95,7 +95,7 @@
 
 - name: Create Elastic IP
   shell: >
-      aws ec2 allocate-address --domain vpc --query AllocationId | tr -d '"'
+      aws ec2 allocate-address --domain vpc --query AllocationId --region "{{ region }}" | tr -d '"'
   register: eip
 
 - debug: var=eip
@@ -114,13 +114,15 @@
     aws ec2 create-nat-gateway \
     --subnet-id {{ public_subnet_id }} \
     --allocation-id {{ my_elastic_ip }} \
-    --query NatGateway.NatGatewayId | tr -d '"'
+    --query NatGateway.NatGatewayId --region "{{ region }}" | tr -d '"'
   register: my_nat_gateway
 
 - name: Set Nat Gateway ID in variable
   set_fact:
     nat_gateway_id: "{{ my_nat_gateway.stdout }}"
 
+
+- debug: var=nat_gateway_id
 
 # We pause a few seconds for the NAT Gateway to be ready.
 

@@ -1,11 +1,27 @@
 from os import path
 from mimetypes import MimeTypes
+import re
 
 from django.http import HttpResponse, Http404
 
 
 ARCHIVE = path.expanduser("~/archive")
 STAGING_AREA = path.expanduser("~/stage")
+GRIB_LENGTH = 1397695
+VALID_IDS = ["10u", "10v", "2t", "sp"]
+SUBSET_PATTERN = """
+^
+[tx-z]
+\(
+(
+ \d+
+ |
+  (\d+|\*)+
+  ,
+  (\d+|\*)
+)
+\)
+"""
 
 
 def index(request):
@@ -42,17 +58,25 @@ def get_resource(request, filename):
     return response
 
 
+def subset_is_valid(subset):
+    """Subset is well-formed."""
+    return re.search(SUBSET_PATTERN, subset, re.VERBOSE) is not None
+
+
+# TODO: Formalize tests. Assert is good for now, but correct errors needed, etc.
 def wcs(request):
     """Entry point for a WCS request."""
     service = request.GET["service"]
-    version = request.GET["version"]
     req_type = request.GET["request"]
-    id_list = request.GET.getlist("id")
-    subsets = {}
-    for x in request.GET.keys():
-       if x.startswith("subset"):
-            subsets[x] = request.GET[x]
     assert(service.lower() == "wcs" and req_type.lower() == "getcoverage")
+
+    id_list = request.GET["id"].split(",")
+    assert(set(id_list) <= set(VALID_IDS))
+
+    subsets = [request.GET[x] for x in request.GET.keys()
+               if x.startswith("subset")]
+    for subset in subsets: assert(subset_is_valid(subset))
+    version = request.GET["version"]
 
     response = """
     Service: {s} <br>

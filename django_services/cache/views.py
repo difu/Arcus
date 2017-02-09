@@ -2,7 +2,7 @@ from os import path
 from mimetypes import MimeTypes
 import re
 
-from django.http import HttpResponse, Http404
+from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseNotFound
 
 
 ARCHIVE = path.expanduser("~/archive")
@@ -40,7 +40,7 @@ def stage(request, filename):
     print("staging file")
     full_path = path.join(ARCHIVE, filename)
     if not path.exists(full_path):
-        raise Http404()
+        raise HttpResponseNotFound("Resource not found in archive.")
     response = response_from_file(full_path)
     staged_path = path.join(STAGING_AREA, filename)
     with open(staged_path, "w") as staged_file:
@@ -63,20 +63,29 @@ def subset_is_valid(subset):
     return re.search(SUBSET_PATTERN, subset, re.VERBOSE) is not None
 
 
-# TODO: Formalize tests. Assert is good for now, but correct errors needed, etc.
 def wcs(request):
     """Entry point for a WCS request."""
     service = request.GET["service"]
     req_type = request.GET["request"]
-    assert(service.lower() == "wcs" and req_type.lower() == "getcoverage")
+    if not service.lower() == "wcs" or not req_type.lower() == "getcoverage":
+        return HttpResponseBadRequest("Only WCS:GetCoverage requests are "
+                                      "supported.")
 
-    id_list = request.GET["id"].split(",")
-    assert(set(id_list) <= set(VALID_IDS))
+    id_list = request.GET["coverageId"].split(",")
+    if not set(id_list) <= set(VALID_IDS):
+        return HttpResponseNotFound("Requested coverageId not found. Valid "
+                                    "coverageIds: {}".format(VALID_IDS))
 
-    subsets = [request.GET[x] for x in request.GET.keys()
-               if x.startswith("subset")]
-    for subset in subsets: assert(subset_is_valid(subset))
+    subsets = request.GET.getlist("subset")
+    for subset in subsets:
+        if not subset_is_valid(subset):
+            return HttpResponseBadRequest("Invalid subsetting syntax.")
+
     version = request.GET["version"]
+    if version != "2.0":
+        return HttpResponseBadRequest("Only WCS 2.0 requests supported.")
+
+    time_subsets = [x for x in subsets if x.startswith("t")]
 
     response = """
     Service: {s} <br>
@@ -84,7 +93,10 @@ def wcs(request):
     Request: {r} <br>
     Layer IDs: {i} <br>
     Subsets: {sub}
-    """.format(s=service, v=version, r=req_type, i=id_list, sub=subsets)
+    <p>
+    Time subsets: {time_subs}
+    """.format(s=service, v=version, r=req_type, i=id_list, sub=subsets,
+               time_subs=time_subsets)
 
     return HttpResponse(response)
 

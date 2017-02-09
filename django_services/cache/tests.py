@@ -47,3 +47,8 @@ class WCSParsing(TestCase):
         self.assertIsNotNone(re.search(SUBSET_PATTERN,
                                        "t(20170208)", re.VERBOSE))
         self.assertIsNotNone(re.search(SUBSET_PATTERN, "z(42,*)", re.VERBOSE))
+
+    def test_proper_errors_returned(self):
+        """
+        Malformed or invalid WCS requests are rejected with proper error codes.
+        """

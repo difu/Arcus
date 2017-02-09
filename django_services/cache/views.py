@@ -1,5 +1,7 @@
 import datetime
+import md5
 import re
+from httplib import HTTPSConnection
 from mimetypes import MimeTypes
 from os import path
 from string import ljust
@@ -10,7 +12,7 @@ ARCHIVE = path.expanduser("~/archive")
 STAGING_AREA = path.expanduser("~/stage")
 GRIB_LENGTH = 1397695
 VALID_IDS = ("10u", "10v", "2t", "sp")
-TIME_RANGE = ("1995010100", "1995013123")
+TIME_RANGE = ("1995010101", "1995013123")
 TIME_FORMAT = "%Y%m%d%H"
 SUBSET_PATTERN = """
 ^
@@ -102,6 +104,40 @@ def parse_time_subset(request):
     return requested_timestamps
 
 
+class RequestedResource(object):
+
+    """A requested GRIB resource defined by URI and byte range."""
+
+    def __init__(self, timestamps, layer,
+                 domain="s3.eu-central-1.amazonaws.com",
+                 bucket="dwd-arcus-poc-gribs"):
+        """Discover resources to be requested."""
+        requested_day = timestamps[0][:8]
+        if not all([x.startswith(requested_day) for x in timestamps]):
+            raise RuntimeError("A RequestedResource should contain only 1 day.")
+        resource_name = "{day}/{layer}.grb2".format(day=requested_day,
+                                                    layer=layer)
+        md5_summer = md5.new()
+        md5_summer.update(resource_name)
+        hours = [x[-2:] for x in timestamps]
+
+        self.remote_domain = domain
+        self.bucket = bucket
+        #: e.g. 853a/19950101/10u.grb2
+        self.uri = "/{hash}/{name}".format(hash=md5_summer.hexdigest()[:4],
+                                           name=resource_name)
+        #: e.g. 0-299
+        self.byte_range = "{}-{}".format(min(hours) * GRIB_LENGTH,
+                                         max(hours) * GRIB_LENGTH)
+
+    def request(self):
+        conn = HTTPSConnection(self.remote_domain)
+        conn.request("GET", self.bucket + self.uri,
+                     headers={"Range": "bytes={}".format(self.byte_range)})
+        response = conn.getresponse()
+        return response.read()
+
+
 def wcs(request):
     """Entry point for a WCS request."""
     service = request.GET["service"]
@@ -127,7 +163,19 @@ def wcs(request):
     time_subsets = [x for x in subsets if x.startswith("t")]
     requested_times = []
     for time_subset in time_subsets:
-        requested_times.append(parse_time_subset(time_subset))
+        requested_times += parse_time_subset(time_subset)
+
+    """
+    Form requests. You do this by consuming requested_times day by day. Pass
+    them all in to a RequestedResource, which you keep in a list. Then at the
+    end of it all you can use the RequestedResource's request method to pull
+    back the data and send it buffered to the user.
+    Do this in a loop over the layers. One layer should return all timestamps
+    before the next layer is begun.
+    Preliminary check:
+    rr = RequestedResource(some_timestamps, "2t")
+    print(rr.remote_domain + "/" + rr.bucket + rr.uri)
+    """
 
     response = """
     Service: {s} <br>

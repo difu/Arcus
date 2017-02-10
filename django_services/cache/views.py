@@ -33,11 +33,11 @@ def get_resource(request, filename):
     
     if not path.exists(full_path):
         domain, service = SKY_SERVICE.split("/")
-        response = get_by_http(domain, "/{}/{}".format(service, filename))
+        url = "/{}/{}".format(service, filename)
+        response = get_by_http(domain, url)
         # Sky serviced cached request, try again
         if response.status == 302:
-            response = get_by_http(domain, "/{}/{}".format(service, filename))
-            response = StreamingHttpResponse((response.read()))
+            return get_resource(request, filename)
         elif response.status == 404:
             return HttpResponseNotFound("Sky could not locate resource.")
     else:

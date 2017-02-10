@@ -22,9 +22,10 @@ def stage(request, filename):
 
     # TODO: Push contents of requested file to cache bucket
     staged_path = path.join(STAGING_AREA, filename)
-    makedirs(path.dirname(staged_path))
+    dirs = path.dirname(staged_path)
+    if not path.isdir(dirs):
+        makedirs(path.dirname(staged_path))
     with open(staged_path, "w") as staged_file:
         staged_file.write(contents)
 
     return HttpResponseRedirect("{}/{}".format(CACHE_SERVICE, filename))
-    return StreamingHttpResponse((contents))

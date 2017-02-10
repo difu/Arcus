@@ -82,7 +82,7 @@ class RequestedResource(object):
         resource_name = "{day}/{var}.grb2".format(day=requested_day,
                                                   var=coverage)
         md5 = hashlib.md5()
-        md5.update(resource_name)
+        md5.update(resource_name.replace("/", "_"))
         hours = [x[-2:] for x in timestamps]
 
         self.remote_domain = domain

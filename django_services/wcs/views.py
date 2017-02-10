@@ -38,13 +38,13 @@ def parse_time_subset(request):
     request = [request[request.index("(") + 1: request.index(",")],
                request[request.index(",") + 1: -1]]
 
-    for x in request:
-        if len(x) < 4 or not x.isdigit():
-            raise TypeError("Time steps should be formatted: YYYY[MM][DD][HH]")
-
     for i in range(len(request)):
         if request[i] == "*":
             request[i] = available_times[i]
+        elif len(request[i]) < 4 or not request[i].isdigit():
+            raise TypeError("Requested time step: {} "
+                            "Time steps should be formatted: "
+                            "YYYY[MM][DD][HH]".format(x))
 
     # Dates are formatted %Y%m%d%H
     if len(request[0]) < 10:
@@ -87,7 +87,7 @@ class RequestedResource(object):
 
         self.remote_domain = domain
         self.bucket = bucket
-        #: e.g. 853a/19950101/10u.grb2
+        #: e.g. 0fcf/19950109/2t.grb2
         self.uri = "/{hash}/{name}".format(hash=md5.hexdigest()[:4],
                                            name=resource_name)
         #: e.g. 0-299
@@ -97,7 +97,7 @@ class RequestedResource(object):
     @property
     def connection(self):
         conn = HTTPSConnection(self.remote_domain)
-        conn.request("GET", self.bucket + self.uri,
+        conn.request("GET", "/" + self.bucket + self.uri,
                      headers={"Range": "bytes={}".format(self.byte_range)})
         return conn
 
@@ -136,29 +136,6 @@ def wcs(request):
             timestamps = [x for x in requested_times if x.startswith(day)]
             resources.append(RequestedResource(timestamps, coverage))
 
+    return StreamingHttpResponse((r.connection.getresponse().read() for r in
+                                  resources))
 
-
-
-    response = """
-    <html><head><style>body {{font-family: monospace;}}</style></head><body>
-    Service: {s} <br>
-    Version: {v} <br>
-    Request: {r} <br>
-    Layer IDs: {i} <br>
-    Subsets: {sub}
-    <p>
-    Time subsets: {time_subs}
-    <p>
-    Requested times: {times}
-    <p>
-    Requested days: {d}
-    <p>
-    Requested resources: {rr}
-    </body></html>
-    """.format(s=service, v=version, r=req_type, i=id_list, sub=subsets,
-               time_subs=time_subsets, times=requested_times, d=days,
-               rr=["{}/{}{} bytes: {}<br>".format(r.remote_domain, r.bucket,
-                                                  r.uri, r.byte_range)
-                   for r in resources])
-
-    return StreamingHttpResponse(response)

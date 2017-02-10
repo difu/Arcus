@@ -1,11 +1,13 @@
 import datetime
 import hashlib
 import re
-from httplib import HTTPSConnection
+from httplib import HTTPConnection as HTTPSConnection
 from string import ljust
 
 from django.http import (HttpResponseBadRequest, HttpResponseNotFound,
                          StreamingHttpResponse)
+
+from settings import CACHE_SERVICE
 
 GRIB_LENGTH = 1397695
 VALID_IDS = ("10u", "10v", "2t", "sp")
@@ -44,7 +46,7 @@ def parse_time_subset(request):
         elif len(request[i]) < 4 or not request[i].isdigit():
             raise TypeError("Requested time step: {} "
                             "Time steps should be formatted: "
-                            "YYYY[MM][DD][HH]".format(x))
+                            "YYYY[MM][DD][HH]".format(request[i]))
 
     # Dates are formatted %Y%m%d%H
     if len(request[0]) < 10:
@@ -73,8 +75,8 @@ class RequestedResource(object):
     """A requested GRIB resource defined by URI and byte range."""
 
     def __init__(self, timestamps, coverage,
-                 domain="s3.eu-central-1.amazonaws.com",
-                 bucket="dwd-arcus-poc-gribs"):
+                 domain=CACHE_SERVICE.split("/")[0],
+                 service=CACHE_SERVICE.split("/")[1]):
         """Discover resources to be requested."""
         requested_day = timestamps[0][:8]
         if not all([x.startswith(requested_day) for x in timestamps]):
@@ -86,8 +88,8 @@ class RequestedResource(object):
         hours = [x[-2:] for x in timestamps]
 
         self.remote_domain = domain
-        self.bucket = bucket
-        #: e.g. 0fcf/19950109/2t.grb2
+        self.service = service
+        #: e.g. /0fcf/19950109/2t.grb2
         self.uri = "/{hash}/{name}".format(hash=md5.hexdigest()[:4],
                                            name=resource_name)
         #: e.g. 0-299
@@ -97,7 +99,7 @@ class RequestedResource(object):
     @property
     def connection(self):
         conn = HTTPSConnection(self.remote_domain)
-        conn.request("GET", "/" + self.bucket + self.uri,
+        conn.request("GET", "/" + self.service + self.uri,
                      headers={"Range": "bytes={}".format(self.byte_range)})
         return conn
 

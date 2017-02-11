@@ -18,6 +18,7 @@ from django.contrib import admin
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
-    url(r'^cache/', include('cache.urls')),
     url(r'^wcs/', include('wcs.urls')),
+    url(r'^cache/', include('cache.urls')),
+    url(r'^sky/', include('sky.urls')),
 ]

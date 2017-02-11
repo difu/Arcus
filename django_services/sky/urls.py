@@ -3,5 +3,5 @@ from django.conf.urls import url
 from . import views
 
 urlpatterns = [
-    url(r'.*', views.wcs, name="wcs")
+    url(r'^(.*)$', views.stage, name="stage")
 ]

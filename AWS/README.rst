@@ -41,3 +41,16 @@ SSH
 """"""""""""""""""
 
 All private ssh-keys will be stored in your ``~/.ssh/`` directory.
+
+****
+VPC
+****
+
+VPC, Subnets, Routing
+"""""""""""""""""""""
+
+Run the following playbook, to setup VPC::
+
+  ansible-playbook -i ec2.y VPC.yml -e my_ip="INSERT_YOUR_IP_HERE"
+
+the ``myip`` parameter configures the IP that is allowed to connect to the bastion host.

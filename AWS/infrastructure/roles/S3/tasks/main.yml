@@ -1,0 +1,8 @@
+# tasks file for S3
+---
+    - name: create S3 bucket for internal use
+      s3:
+        bucket: "{{ s3_internal_bucket_name }}"
+        mode: create
+        region: "{{ region }}"
+        permission: authenticated-read

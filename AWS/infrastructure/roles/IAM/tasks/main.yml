@@ -1,15 +1,66 @@
 # tasks file for IAM
 ---
-    - name: create IAM webserver_role
-      iam:
-        iam_type: role
-        name: webserver_role
-        state: present
+- name: get account id for roles and policies
+  shell: >
+      aws sts get-caller-identity --output text --query 'Account' --region "{{ region }}" | tr -d '"'
+  register: acc_id
 
-    - name: Assign a policy called S3ReadOnly to the webserver_role
-      iam_policy:
-        iam_type: role
-        iam_name: webserver_role
-        policy_name: S3ReadOnly
-        state: present
-        policy_document: roles/IAM/files/iam_policy_s3_read.json
+- debug:
+    var: acc_id
+
+- name: Set account_id in variable
+  set_fact:
+    account_id: "{{ acc_id.stdout }}"
+
+- name: create IAM webserver_role
+  iam:
+    iam_type: role
+    name: webserver_role
+    state: present
+    path: "/service-role/"
+
+- name: Assign policy s3_read_internal to the webserver_role
+  iam_policy:
+    iam_type: role
+    iam_name: webserver_role
+    policy_name: s3_read_internal
+    state: present
+    policy_json: "{{ lookup( 'template', 'iam_policy_s3_read_internal.json.j2') }}"
+
+- name: create IAM deploymemt server role
+  iam:
+    iam_type: role
+    name: deployment_server_role
+    state: present
+    path: /service-role/
+
+- name: Assign policy s3_read_write_internal to the deployment_server_role
+  iam_policy:
+    iam_type: role
+    iam_name: deployment_server_role
+    policy_name: s3_read_write_internal
+    state: present
+    policy_json: "{{ lookup( 'template', 'iam_policy_s3_read_write_internal.json.j2') }}"
+
+- name: create IAM S3 lambda role
+  iam:
+    iam_type: role
+    name: s3_lambda_role
+    state: present
+    path: /service-role/
+
+- name: Assign policy iam_policy_lambda_basic_execution to the s3_lambda_role
+  iam_policy:
+    iam_type: role
+    iam_name: s3_lambda_role
+    policy_name: lambda_basic_execution
+    state: present
+    policy_json: "{{ lookup( 'template', 'iam_policy_lambda_basic_execution.json.j2') }}"
+
+- name: Assign policy s3_read_write_internal to the s3_lambda_role
+  iam_policy:
+    iam_type: role
+    iam_name: s3_lambda_role
+    policy_name: lambda_s3_execution
+    state: present
+    policy_json: "{{ lookup( 'template', 'iam_policy_lambda_s3_execution.json.j2') }}"

@@ -3,6 +3,9 @@ ansible_user: ec2-user
 region: eu-central-1
 environment_prefix: devel
 
+s3_prefix_internal_bucket: arcus
+s3_internal_bucket_name: "{{ environment_prefix }}-{{ s3_prefix_internal_bucket }}-internal"
+
 sec_group_webserver: sg_webserver
 num_of_webservers: 1
 

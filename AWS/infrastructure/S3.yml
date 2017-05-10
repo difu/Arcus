@@ -1,0 +1,5 @@
+---
+- name: S3_Install
+  hosts: localhost
+  roles:
+  - S3

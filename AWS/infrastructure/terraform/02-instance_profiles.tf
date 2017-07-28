@@ -53,6 +53,29 @@ resource "aws_iam_policy" "leader-discovery" {
     EOF
 }
 
+
+resource "aws_iam_policy" "Arcus-internal-S3-read" {
+  name        = "arcus-node-read-S3"
+  path        = "/S3/"
+  description = "This policy allows a arcus server to read S3 bucket"
+
+  policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "s3:Get*",
+        "s3:List*"
+      ],
+      "Resource": "*"
+    }
+  ]
+}
+    EOF
+}
+
 //  Create a role which arcus instances will assume.
 //  This role has a policy saying it can be assumed by ec2
 //  instances.
@@ -87,6 +110,12 @@ resource "aws_iam_policy_attachment" "arcus-instance-leader-discovery" {
   name       = "arcus-instance-leader-discovery"
   roles      = ["${aws_iam_role.grib-parse-instance-role.name}"]
   policy_arn = "${aws_iam_policy.leader-discovery.arn}"
+}
+
+resource "aws_iam_policy_attachment" "arcus-instance-S3-read" {
+  name       = "arcus-instance-leader-discovery"
+  roles      = ["${aws_iam_role.grib-parse-instance-role.name}"]
+  policy_arn = "${aws_iam_policy.Arcus-internal-S3-read.arn}"
 }
 
 //  Create a instance profile for the role.

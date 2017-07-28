@@ -24,14 +24,21 @@ data "aws_ami" "amazonlinux" {
   }
 }
 
+data "template_file" "eccodes" {
+  template = "${file("files/install_eccodes.sh")}"
+}
+
 resource "aws_launch_configuration" "grib-parse-cluster-lc" {
-  name_prefix          = "consul-node-"
+  name_prefix          = "grib-parse-node-"
   image_id             = "${data.aws_ami.amazonlinux.image_id}"
   instance_type        = "${var.amisize_grib_parse_instance}"
+  user_data            = "${data.template_file.eccodes.rendered}"
   iam_instance_profile = "${aws_iam_instance_profile.grib-parse-instance-profile.id}"
 
   security_groups = [
     "${aws_security_group.arcus-public-ssh.id}",
+    "${aws_security_group.arcus-public-ssl.id}",
+    "${aws_security_group.arcus-public-http.id}",
   ]
 
   lifecycle {

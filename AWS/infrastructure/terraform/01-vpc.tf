@@ -104,3 +104,39 @@ resource "aws_security_group" "arcus-public-ssh" {
     Project = "Arcus"
   }
 }
+
+resource "aws_security_group" "arcus-public-ssl" {
+  name        = "arcus-public-ssl"
+  description = "Security group that allows SSL traffic to internet"
+  vpc_id      = "${aws_vpc.arcus.id}"
+
+  egress {
+    from_port   = "443"
+    to_port     = "443"
+    protocol    = "6"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags {
+    Name    = "Public SSL Egress"
+    Project = "Arcus"
+  }
+}
+
+resource "aws_security_group" "arcus-public-http" {
+  name        = "arcus-public-http"
+  description = "Security group that allows http traffic to internet"
+  vpc_id      = "${aws_vpc.arcus.id}"
+
+  egress {
+    from_port   = "80"
+    to_port     = "80"
+    protocol    = "6"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags {
+    Name    = "Public http Egress"
+    Project = "Arcus"
+  }
+}

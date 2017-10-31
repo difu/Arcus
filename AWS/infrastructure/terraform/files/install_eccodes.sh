@@ -12,7 +12,7 @@ yum install libpng-devel -y
 pip install numpy
 
 
-aws s3 --region eu-central-1 cp s3://devel-arcus-internal/software/eccodes/eccodes-2.4.0-Source.tar.gz .
+aws s3 --region eu-central-1 cp s3://${internal_bucket_name}/software/eccodes/eccodes-2.4.0-Source.tar.gz .
 tar xf eccodes-2.4.0-Source.tar.gz
 mkdir build ; cd build
 

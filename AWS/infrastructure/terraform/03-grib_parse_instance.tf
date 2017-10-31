@@ -26,6 +26,9 @@ data "aws_ami" "amazonlinux" {
 
 data "template_file" "eccodes" {
   template = "${file("files/install_eccodes.sh")}"
+  vars {
+    internal_bucket_name = "${var.arcus_internal_bucket_name}"
+  }
 }
 
 resource "aws_launch_configuration" "grib-parse-cluster-lc" {

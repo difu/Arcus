@@ -51,3 +51,7 @@ variable "key_name" {
 variable "amisize_grib_parse_instance" {
   default = "t2.micro"
 }
+
+variable "arcus_internal_bucket_name" {
+  default = "devel-arcus-internal"
+}

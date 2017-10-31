@@ -26,6 +26,7 @@ data "aws_ami" "amazonlinux" {
 
 data "template_file" "eccodes" {
   template = "${file("files/install_eccodes.sh")}"
+
   vars {
     internal_bucket_name = "${var.arcus_internal_bucket_name}"
   }
@@ -55,8 +56,8 @@ resource "aws_autoscaling_group" "grib-parse-cluster-asg" {
   depends_on           = ["aws_launch_configuration.grib-parse-cluster-lc"]
   name                 = "grib-parse-cluster-asg"
   launch_configuration = "${aws_launch_configuration.grib-parse-cluster-lc.name}"
-  min_size             = "1"
-  max_size             = "1"
+  min_size             = "${var.min_grib_parse_instances}"
+  max_size             = "${var.max_grib_parse_instances}"
   vpc_zone_identifier  = ["${aws_subnet.public-a.id}", "${aws_subnet.public-b.id}", "${aws_subnet.public-c.id}"]
 
   lifecycle {

@@ -45,7 +45,7 @@ variable "public_subnet_cidr3" {
 
 variable "key_name" {
   description = "The name of the key to user for ssh access"
-  default = "eu-central-1_KP"
+  default     = "eu-central-1_KP"
 }
 
 variable "amisize_grib_parse_instance" {
@@ -54,4 +54,12 @@ variable "amisize_grib_parse_instance" {
 
 variable "arcus_internal_bucket_name" {
   default = "devel-arcus-internal"
+}
+
+variable "min_grib_parse_instances" {
+  default = "1"
+}
+
+variable "max_grib_parse_instances" {
+  default = "1"
 }

@@ -3,3 +3,4 @@
 *.sqlite3
 *.retry
 *tfstate*
+/AWS/infrastructure/terraform/.terraform

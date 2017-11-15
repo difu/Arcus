@@ -29,6 +29,8 @@ data "template_file" "eccodes" {
 
   vars {
     internal_bucket_name = "${var.arcus_internal_bucket_name}"
+    eccodes_path = "${var.eccodes_path}"
+    eccodes_version = "${var.eccodes_version}"
   }
 }
 

@@ -56,6 +56,16 @@ variable "arcus_internal_bucket_name" {
   default = "devel-arcus-internal"
 }
 
+variable "eccodes_path" {
+  description = "path to eccodes software"
+  default = "software/eccodes"
+}
+
+variable "eccodes_version" {
+  description = "eccodes source version. Must be equal to the tar.gz file without extension."
+  default = "eccodes-2.4.0-Source"
+}
+
 variable "min_grib_parse_instances" {
   default = "1"
 }

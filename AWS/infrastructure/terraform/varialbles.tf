@@ -52,6 +52,14 @@ variable "amisize_grib_parse_instance" {
   default = "t2.micro"
 }
 
+variable "amisize_emr_master_instance" {
+  default = "m4.large"
+}
+
+variable "amisize_emr_core_instance" {
+  default = "m4.large"
+}
+
 variable "arcus_internal_bucket_name" {
   default = "devel-arcus-internal"
 }

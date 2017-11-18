@@ -53,7 +53,6 @@ resource "aws_iam_policy" "leader-discovery" {
     EOF
 }
 
-
 resource "aws_iam_policy" "Arcus-internal-S3-read" {
   name        = "arcus-node-read-S3"
   path        = "/S3/"
@@ -120,6 +119,6 @@ resource "aws_iam_policy_attachment" "arcus-instance-S3-read" {
 
 //  Create a instance profile for the role.
 resource "aws_iam_instance_profile" "grib-parse-instance-profile" {
-  name  = "grib-parse-instance-profile"
+  name = "grib-parse-instance-profile"
   role = "${aws_iam_role.grib-parse-instance-role.name}"
 }

@@ -1,3 +1,8 @@
+variable "project" {
+  description = "The name of this project"
+  default     = "Arcus"
+}
+
 variable "aws_region" {
   description = "AWS region to launch servers."
   default     = "eu-central-1"
@@ -41,6 +46,10 @@ variable "public_subnet_cidr2" {
 
 variable "public_subnet_cidr3" {
   default = "10.0.3.0/24"
+}
+
+variable "public_subnet_cidr_emr" {
+  default = "10.0.4.0/24"
 }
 
 variable "key_name" {

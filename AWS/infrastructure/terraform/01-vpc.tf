@@ -3,8 +3,8 @@ resource "aws_vpc" "arcus" {
   enable_dns_hostnames = true
 
   tags {
-    Name    = "Arcus VPC"
-    Project = "Arcus"
+    name    = "${var.project} VPC"
+    project = "Arcus"
   }
 }
 
@@ -13,8 +13,8 @@ resource "aws_internet_gateway" "arcus-igw" {
   vpc_id = "${aws_vpc.arcus.id}"
 
   tags {
-    Name    = "Arcus IGW"
-    Project = "Arcus"
+    name    = "${var.project} IGW"
+    project = "Arcus"
   }
 }
 
@@ -27,8 +27,8 @@ resource "aws_subnet" "public-a" {
   depends_on              = ["aws_internet_gateway.arcus-igw"]
 
   tags {
-    Name    = "Arcus Public Subnet"
-    Project = "Arcus"
+    name    = "${var.project} Public Subnet A"
+    project = "${var.project}"
   }
 }
 
@@ -40,8 +40,8 @@ resource "aws_subnet" "public-b" {
   depends_on              = ["aws_internet_gateway.arcus-igw"]
 
   tags {
-    Name    = "Arcus Public Subnet"
-    Project = "Arcus"
+    name    = "${var.project} Public Subnet B"
+    project = "${var.project}"
   }
 }
 
@@ -53,8 +53,20 @@ resource "aws_subnet" "public-c" {
   depends_on              = ["aws_internet_gateway.arcus-igw"]
 
   tags {
-    Name    = "Arcus Public Subnet"
-    Project = "Arcus"
+    name    = "${var.project} Public Subnet C"
+    project = "${var.project}"
+  }
+}
+
+resource "aws_subnet" "public-emr" {
+  vpc_id                  = "${aws_vpc.arcus.id}"
+  cidr_block              = "${var.public_subnet_cidr_emr}"
+  map_public_ip_on_launch = true
+  depends_on              = ["aws_internet_gateway.arcus-igw"]
+
+  tags {
+    name    = "${var.project} Public Subnet EMR"
+    project = "${var.project}"
   }
 }
 
@@ -67,8 +79,8 @@ resource "aws_route_table" "public" {
   }
 
   tags {
-    Name    = "Arcus Public Route Table"
-    Project = "Arcus"
+    name    = "${var.project} Public Route Table"
+    project = "${var.project}"
   }
 }
 
@@ -87,6 +99,11 @@ resource "aws_route_table_association" "public-c" {
   route_table_id = "${aws_route_table.public.id}"
 }
 
+resource "aws_route_table_association" "public-emr" {
+  subnet_id      = "${aws_subnet.public-emr.id}"
+  route_table_id = "${aws_route_table.public.id}"
+}
+
 resource "aws_security_group" "arcus-public-ssh" {
   name        = "arcus-public-ssh"
   description = "Security group that allows SSH traffic from internet"
@@ -100,13 +117,13 @@ resource "aws_security_group" "arcus-public-ssh" {
   }
 
   tags {
-    Name    = "Public SSH"
-    Project = "Arcus"
+    name    = "${var.project} Public SSH"
+    project = "${var.project}"
   }
 }
 
 resource "aws_security_group" "arcus-public-ssl" {
-  name        = "arcus-public-ssl"
+  name        = "${var.project}-public-ssl"
   description = "Security group that allows SSL traffic to internet"
   vpc_id      = "${aws_vpc.arcus.id}"
 
@@ -118,8 +135,8 @@ resource "aws_security_group" "arcus-public-ssl" {
   }
 
   tags {
-    Name    = "Public SSL Egress"
-    Project = "Arcus"
+    name    = "${var.project} Public SSL Egress"
+    project = "${var.project}"
   }
 }
 
@@ -136,7 +153,7 @@ resource "aws_security_group" "arcus-public-http" {
   }
 
   tags {
-    Name    = "Public http Egress"
-    Project = "Arcus"
+    name    = "${var.project} Public http Egress"
+    project = "${var.project}"
   }
 }

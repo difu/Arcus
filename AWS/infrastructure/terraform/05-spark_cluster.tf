@@ -4,7 +4,7 @@ resource "aws_emr_cluster" "arcus-emr-cluster" {
   applications  = ["Spark"]
 
   ec2_attributes {
-    subnet_id                         = "${aws_subnet.public-a.id}"
+    subnet_id                         = "${aws_subnet.public-emr.id}"
     instance_profile                  = "EMR_EC2_DefaultRole"
     emr_managed_master_security_group = "${aws_security_group.arcus_emr_master_sg.id}"
     emr_managed_slave_security_group  = "${aws_security_group.arcus_emr_slave_sg.id}"
@@ -16,17 +16,18 @@ resource "aws_emr_cluster" "arcus-emr-cluster" {
   master_instance_type = "${var.amisize_emr_master_instance}"
   core_instance_type   = "${var.amisize_emr_core_instance}"
   core_instance_count  = 1
-  log_uri = "s3://${var.arcus_internal_bucket_name}/logs"
+  log_uri = "s3://${var.arcus_internal_bucket_name}/logs/emr"
 
   tags {
-    name     = "arcus-emr"
+    name     = "${var.project}-emr"
+    project = "${var.project}"
   }
 
-/*  bootstrap_action {
-    path = "s3://elasticmapreduce/bootstrap-actions/run-if"
+  bootstrap_action {
+    path = "s3://devel-arcus-internal/run-if"
     name = "runif"
     args = ["instance.isMaster=true", "echo running on master node"]
-  }*/
+  }
 
   configurations = "test-fixtures/emr_configurations.json"
 
@@ -50,11 +51,12 @@ resource "aws_security_group" "arcus_emr_master_sg" {
   }
 
   revoke_rules_on_delete = "true"
-  depends_on = ["aws_subnet.public-a"]
+  depends_on = ["aws_subnet.public-emr"]
 
 
   tags {
-    Name = "arcus_emr_master_sg"
+    name = "${var.project}_emr_master_sg"
+    project = "${var.project}"
   }
 }
 
@@ -75,9 +77,10 @@ resource "aws_security_group" "arcus_emr_slave_sg" {
   }
 
   revoke_rules_on_delete = "true"
-  depends_on = ["aws_subnet.public-a"]
+  depends_on = ["aws_subnet.public-emr"]
 
   tags {
-    Name = "arcus_emr_slave_sg"
+    name    = "${var.project}_emr_slave_sg"
+    project = "${var.project}"
   }
 }

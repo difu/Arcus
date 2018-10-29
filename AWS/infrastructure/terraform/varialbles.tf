@@ -90,3 +90,8 @@ variable "min_grib_parse_instances" {
 variable "max_grib_parse_instances" {
   default = "1"
 }
+
+variable "create_emr_cluster" {
+  description = "If set to true, create an EMR Cluster"
+  default = false
+}

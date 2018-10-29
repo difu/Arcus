@@ -2,6 +2,7 @@ resource "aws_emr_cluster" "arcus-emr-cluster" {
   name          = "emr-test-arn"
   release_label = "emr-5.9.0"
   applications  = ["Spark"]
+  count = "${var.create_emr_cluster}"
 
   ec2_attributes {
     subnet_id                         = "${aws_subnet.public-emr.id}"

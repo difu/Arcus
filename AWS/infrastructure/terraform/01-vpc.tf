@@ -157,3 +157,29 @@ resource "aws_security_group" "arcus-public-http" {
     project = "${var.project}"
   }
 }
+
+resource "aws_security_group" "arcus-nfs" {
+  name        = "arcus-public-nfs"
+  description = "Security group that allows nfs connection"
+  vpc_id      = "${aws_vpc.arcus.id}"
+
+  egress {
+    from_port   = "2049"
+    to_port     = "2049"
+    protocol    = "6"
+    cidr_blocks = ["${var.vpc_cidr}",]
+  }
+
+   ingress {
+    from_port   = "2049"
+    to_port     = "2049"
+    protocol    = "6"
+    cidr_blocks = ["${var.vpc_cidr}",]
+  }
+
+  tags {
+    name    = "${var.project} NFS Ingress/Egress"
+    project = "${var.project}"
+  }
+}
+

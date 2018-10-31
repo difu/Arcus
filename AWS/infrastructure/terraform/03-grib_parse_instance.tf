@@ -45,6 +45,7 @@ resource "aws_launch_configuration" "grib-parse-cluster-lc" {
     "${aws_security_group.arcus-public-ssh.id}",
     "${aws_security_group.arcus-public-ssl.id}",
     "${aws_security_group.arcus-public-http.id}",
+    "${aws_security_group.arcus-nfs.id}",
   ]
 
   lifecycle {

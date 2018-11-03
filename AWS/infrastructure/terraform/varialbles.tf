@@ -61,6 +61,10 @@ variable "amisize_grib_parse_instance" {
   default = "t2.micro"
 }
 
+variable "amisize_oracle_instance" {
+  default = "t3.medium"
+}
+
 variable "amisize_emr_master_instance" {
   default = "m4.large"
 }

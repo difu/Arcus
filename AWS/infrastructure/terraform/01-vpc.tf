@@ -183,3 +183,27 @@ resource "aws_security_group" "arcus-nfs" {
   }
 }
 
+resource "aws_security_group" "arcus-tns" {
+  name        = "arcus-public-tns"
+  description = "Security group that allows nfs connection"
+  vpc_id      = "${aws_vpc.arcus.id}"
+
+  egress {
+    from_port   = "1521"
+    to_port     = "1521"
+    protocol    = "6"
+    cidr_blocks = ["${var.vpc_cidr}",]
+  }
+
+   ingress {
+    from_port   = "1521"
+    to_port     = "1521"
+    protocol    = "6"
+    cidr_blocks = ["${var.vpc_cidr}",]
+  }
+
+  tags {
+    name    = "${var.project} TNS Ingress/Egress"
+    project = "${var.project}"
+  }
+}

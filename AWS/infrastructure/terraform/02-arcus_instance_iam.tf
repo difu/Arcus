@@ -56,7 +56,7 @@ resource "aws_iam_policy" "leader-discovery" {
 resource "aws_iam_policy" "Arcus-internal-S3-read" {
   name        = "arcus-node-read-S3"
   path        = "/S3/"
-  description = "This policy allows a arcus server to read S3 bucket"
+  description = "This policy allows an arcus server to read S3 bucket"
 
   policy = <<EOF
 {
@@ -69,6 +69,26 @@ resource "aws_iam_policy" "Arcus-internal-S3-read" {
         "s3:List*"
       ],
       "Resource": "*"
+    }
+  ]
+}
+    EOF
+}
+
+
+resource "aws_iam_policy" "Arcus-describe-tags" {
+  name        = "arcus-describe-tags"
+  path        = "/S3/"
+  description = "This policy allows an arcus instance to describe tags"
+
+  policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [ "ec2:DescribeTags"],
+      "Resource": ["*"]
     }
   ]
 }
@@ -117,8 +137,14 @@ resource "aws_iam_policy_attachment" "arcus-instance-S3-read" {
   policy_arn = "${aws_iam_policy.Arcus-internal-S3-read.arn}"
 }
 
+resource "aws_iam_policy_attachment" "arcus-instance-tags-read" {
+  name       = "arcus-describe-tags"
+  roles      = ["${aws_iam_role.grib-parse-instance-role.name}"]
+  policy_arn = "${aws_iam_policy.Arcus-describe-tags.arn}"
+}
+
 //  Create a instance profile for the role.
-resource "aws_iam_instance_profile" "grib-parse-instance-profile" {
+resource "aws_iam_instance_profile" "arcus-instance-profile" {
   name = "grib-parse-instance-profile"
   role = "${aws_iam_role.grib-parse-instance-role.name}"
 }

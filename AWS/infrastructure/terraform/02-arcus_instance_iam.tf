@@ -78,7 +78,7 @@ resource "aws_iam_policy" "Arcus-internal-S3-read" {
 
 resource "aws_iam_policy" "Arcus-describe-tags" {
   name        = "arcus-describe-tags"
-  path        = "/S3/"
+  path        = "/EC2/"
   description = "This policy allows an arcus instance to describe tags"
 
   policy = <<EOF
@@ -88,6 +88,29 @@ resource "aws_iam_policy" "Arcus-describe-tags" {
     {
       "Effect": "Allow",
       "Action": [ "ec2:DescribeTags"],
+      "Resource": ["*"]
+    }
+  ]
+}
+    EOF
+}
+
+
+resource "aws_iam_policy" "Arcus-describe-efs" {
+  name        = "arcus-describe-efs"
+  path        = "/EFS/"
+  description = "This policy allows an arcus instance to describe efs"
+
+  policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [ "elasticfilesystem:DescribeMountTargets",
+                  "elasticfilesystem:DescribeTags",
+                  "elasticfilesystem:DescribeFileSystems"
+      ],
       "Resource": ["*"]
     }
   ]
@@ -141,6 +164,12 @@ resource "aws_iam_policy_attachment" "arcus-instance-tags-read" {
   name       = "arcus-describe-tags"
   roles      = ["${aws_iam_role.grib-parse-instance-role.name}"]
   policy_arn = "${aws_iam_policy.Arcus-describe-tags.arn}"
+}
+
+resource "aws_iam_policy_attachment" "arcus-efs-meta-read" {
+  name       = "arcus-describe-efs-meta-read"
+  roles      = ["${aws_iam_role.grib-parse-instance-role.name}"]
+  policy_arn = "${aws_iam_policy.Arcus-describe-efs.arn}"
 }
 
 //  Create a instance profile for the role.

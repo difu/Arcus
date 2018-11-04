@@ -99,3 +99,8 @@ variable "create_emr_cluster" {
   description = "If set to true, create an EMR Cluster"
   default = false
 }
+
+variable "create_oracle_instance" {
+  description = "If set to true, create an Oracle DB Server instance"
+  default = false
+}

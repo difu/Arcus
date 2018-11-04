@@ -24,8 +24,8 @@ data "aws_ami" "amazonlinux" {
   }
 }
 
-data "template_file" "eccodes" {
-  template = "${file("files/install_eccodes.sh")}"
+data "template_file" "bootstrap_all" {
+  template = "${file("files/bootstrap_all.sh")}"
 
   vars {
     internal_bucket_name = "${var.arcus_internal_bucket_name}"
@@ -38,7 +38,7 @@ resource "aws_launch_configuration" "grib-parse-cluster-lc" {
   name_prefix          = "grib-parse-node-"
   image_id             = "${data.aws_ami.amazonlinux.image_id}"
   instance_type        = "${var.amisize_grib_parse_instance}"
-  user_data            = "${data.template_file.eccodes.rendered}"
+  user_data            = "${data.template_file.bootstrap_all.rendered}"
   iam_instance_profile = "${aws_iam_instance_profile.arcus-instance-profile.id}"
 
   security_groups = [

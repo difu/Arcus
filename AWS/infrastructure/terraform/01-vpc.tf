@@ -190,7 +190,7 @@ resource "aws_security_group" "arcus-nfs" {
 
 resource "aws_security_group" "arcus-tns" {
   name        = "arcus-public-tns"
-  description = "Security group that allows nfs connection"
+  description = "Security group that allows tns connection"
   vpc_id      = "${aws_vpc.arcus.id}"
 
   egress {

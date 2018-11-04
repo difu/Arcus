@@ -56,6 +56,7 @@ resource "aws_launch_configuration" "grib-parse-cluster-lc" {
 }
 
 resource "aws_autoscaling_group" "grib-parse-cluster-asg" {
+  count = "${var.create_grib_parse_cluster}"
   depends_on           = ["aws_launch_configuration.grib-parse-cluster-lc"]
   name                 = "grib-parse-cluster-asg"
   launch_configuration = "${aws_launch_configuration.grib-parse-cluster-lc.name}"
@@ -67,15 +68,21 @@ resource "aws_autoscaling_group" "grib-parse-cluster-asg" {
     create_before_destroy = true
   }
 
-  tag {
-    key                 = "Name"
-    value               = "Grib parse Node"
-    propagate_at_launch = true
-  }
-
-  tag {
-    key                 = "Project"
-    value               = "Arcus"
-    propagate_at_launch = true
-  }
+  tags = [
+    {
+      key                 = "${var.project} grib parse node"
+      value               = "value1"
+      propagate_at_launch = true
+    },
+    {
+      key                 = "project"
+      value               = "${var.project}"
+      propagate_at_launch = true
+    },
+    {
+      key                 = "software"
+      value               = "eccodes gdal oracleclient"
+      propagate_at_launch = true
+    },
+  ]
 }

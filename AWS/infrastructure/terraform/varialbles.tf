@@ -104,3 +104,8 @@ variable "create_oracle_instance" {
   description = "If set to true, create an Oracle DB Server instance"
   default = false
 }
+
+variable "create_grib_parse_cluster" {
+  description = "If set to true, create a grib parse cluster"
+  default = false
+}

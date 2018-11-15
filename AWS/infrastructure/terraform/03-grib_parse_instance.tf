@@ -57,7 +57,10 @@ resource "aws_launch_configuration" "grib-parse-cluster-lc" {
 
 resource "aws_autoscaling_group" "grib-parse-cluster-asg" {
   count = "${var.create_grib_parse_cluster}"
-  depends_on           = ["aws_launch_configuration.grib-parse-cluster-lc"]
+  depends_on           = ["aws_launch_configuration.grib-parse-cluster-lc",
+                          "aws_efs_mount_target.public_a",
+                          "aws_efs_mount_target.public_b",
+                          "aws_efs_mount_target.public_c"]
   name                 = "grib-parse-cluster-asg"
   launch_configuration = "${aws_launch_configuration.grib-parse-cluster-lc.name}"
   min_size             = "${var.min_grib_parse_instances}"
@@ -67,6 +70,7 @@ resource "aws_autoscaling_group" "grib-parse-cluster-asg" {
   lifecycle {
     create_before_destroy = true
   }
+
 
   tags = [
     {

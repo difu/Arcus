@@ -14,6 +14,7 @@ resource "aws_instance" "oracle_instance" {
   subnet_id         = "${aws_subnet.public-a.id}"
   instance_type     = "${var.amisize_oracle_instance}"
   iam_instance_profile = "${aws_iam_instance_profile.arcus-instance-profile.id}"
+  user_data            = "${data.template_file.bootstrap_all.rendered}"
   key_name = "${var.key_name}"
   root_block_device {
     volume_size = 25
@@ -25,10 +26,13 @@ resource "aws_instance" "oracle_instance" {
     "${aws_security_group.arcus-public-http.id}",
     "${aws_security_group.arcus-tns.id}",
   ]
-
+  depends_on = ["aws_efs_mount_target.public_a",
+                "aws_efs_mount_target.public_b",
+                "aws_efs_mount_target.public_c"]
   tags {
     name    = "${var.project} oracle instance"
     project = "${var.project}"
+    software = "oracledb"
   }
 }
 

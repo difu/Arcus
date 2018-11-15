@@ -71,7 +71,7 @@ do
         rpm -i oracle-instantclient18.3-devel-18.3.0.0.0-1.x86_64.rpm
 
         ;;
-     oracledb)
+    oracledb)
         echo "vm.nr_hugepages = 46" >> /etc/sysctl.conf
         sysctl -p
         yum -y install wget install bc bind-utils compat-libcap1 compat-libstdc++-33 glibc-devel ksh libaio libaio-devel libstdc++-devel psmisc smartmontools sysstat xorg-x11-utils xorg-x11-xauth

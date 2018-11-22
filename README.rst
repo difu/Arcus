@@ -55,7 +55,9 @@ To create and modify the infrastructure `Terraform <https://www.terraform.io/>`_
                 "iam:DeletePolicy",
                 "elasticmapreduce:RunJobFlow",
                 "elasticmapreduce:DescribeCluster",
-                "elasticmapreduce:TerminateJobFlows"
+                "elasticmapreduce:TerminateJobFlows",
+                "lambda:AddPermission",
+                "lambda:RemovePermission"
             ],
             "Resource": [
                 "*"
@@ -74,10 +76,22 @@ To create and modify the infrastructure `Terraform <https://www.terraform.io/>`_
 
   and put the files under ``software/oracle/``
 
-- Enter
+- Creation of infrastructure
 
-  ``terraform init``
+Enter
 
-  ``terraform apply -var arcus_internal_bucket_name =`` *my_internal_bucket*
+ ``terraform init``
+
+ ``terraform import aws_s3_bucket.internal_bucket`` *my_internal_bucket_name*
+
+ ``terraform apply -var arcus_internal_bucket_name =`` *my_internal_bucket_name*
 
 For further configuration see the ``variables.tf`` file in the terraform folder.
+- Destruction of infrastructure
+
+ ``terraform import aws_s3_bucket.internal_bucket`` *my_internal_bucket_name*
+
+ ``terraform destroy``
+
+
+

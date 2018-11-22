@@ -17,3 +17,12 @@ resource "aws_iam_role" "lambda_exec" {
 }
 EOF
 }
+
+resource "aws_iam_role_policy_attachment" "AWSLambdaVPCAccessExecutionRole-role-policy-attach" {
+  role = "${aws_iam_role.lambda_exec.name}"
+  policy_arn = "${data.aws_iam_policy.AWSLambdaVPCAccessExecutionRole.arn}"
+}
+
+data "aws_iam_policy" "AWSLambdaVPCAccessExecutionRole" {
+  arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole"
+}

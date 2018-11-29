@@ -75,8 +75,8 @@ do
         echo "vm.nr_hugepages = 46" >> /etc/sysctl.conf
         sysctl -p
         yum -y install wget install bc bind-utils compat-libcap1 compat-libstdc++-33 glibc-devel ksh libaio libaio-devel libstdc++-devel psmisc smartmontools sysstat xorg-x11-utils xorg-x11-xauth
-        aws s3 --region eu-central-1 cp s3://devel-arcus-internal/software/oracle/oracle-database-preinstall-18c-1.0-1.el7.x86_64.rpm .
-        aws s3 --region eu-central-1 cp s3://devel-arcus-internal/software/oracle/oracle-database-xe-18c-1.0-1.x86_64.rpm .
+        aws s3 --region eu-central-1 cp s3://${internal_bucket_name}/software/oracle/oracle-database-preinstall-18c-1.0-1.el7.x86_64.rpm .
+        aws s3 --region eu-central-1 cp s3://${internal_bucket_name}/software/oracle/oracle-database-xe-18c-1.0-1.x86_64.rpm .
 
         yum -y install oracle-database-preinstall-18c-1.0-1.el7.x86_64.rpm
         yum -y install oracle-database-xe-18c-1.0-1.x86_64.rpm

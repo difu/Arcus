@@ -32,6 +32,7 @@ resource "aws_lambda_function" "lambda_grib2geotiff" {
 }
 
 resource "aws_s3_bucket_notification" "bucket_notification_new_object" {
+  count = "${var.deploy_lambda_convert_grib2geotiff}"
   bucket = "${aws_s3_bucket.internal_bucket.id}"
 
   lambda_function {

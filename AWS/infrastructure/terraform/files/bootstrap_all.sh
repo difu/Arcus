@@ -24,6 +24,8 @@ yum upgrade -y
 REGION=`wget -qO- http://instance-data/latest/meta-data/placement/availability-zone | sed 's/.$//'`
 FSID=`aws efs describe-file-systems --region $$REGION --output=text | awk '{ print $5 }'`
 INSTANCE_ID=`wget -qO- http://instance-data/latest/meta-data/instance-id`
+MYIP=`curl http://169.254.169.254/latest/meta-data/local-ipv4`
+
 
 echo "Region: $REGION FSID $FSID INSTANCE_ID $INSTANCE_ID"
 
@@ -34,7 +36,7 @@ echo "mounting efs $FSID on $EFS_MOUNT_POINT"
 
 mkdir -p $EFS_MOUNT_POINT
 mount -t nfs -o nfsvers=4.1,rsize=1048576,wsize=1048576,hard,timeo=600,retrans=2,noresvport $FSID.efs.$REGION.amazonaws.com:/ $EFS_MOUNT_POINT
-
+chmod 777 $EFS_MOUNT_POINT
 cd /tmp
 
 aws ec2 describe-tags --region $${REGION} --filter "Name=resource-id,Values=$INSTANCE_ID" --output=text | sed -r 's/TAGS\t(.*)\t.*\t.*\t(.*)/\1="\2"/' > ec2-tags
@@ -79,6 +81,21 @@ do
         aws s3 --region eu-central-1 cp s3://${internal_bucket_name}/software/oracle/oracle-database-xe-18c-1.0-1.x86_64.rpm .
 
         yum -y install oracle-database-preinstall-18c-1.0-1.el7.x86_64.rpm
+        mkdir -p $EFS_MOUNT_POINT/oracle/network/admin
+cat <<EOF > $EFS_MOUNT_POINT/oracle/network/admin/tnsnames.ora
+xepdb1 =
+  (DESCRIPTION =
+    (ADDRESS = (PROTOCOL = TCP)(HOST = $MYIP)(PORT = 1521))
+    (CONNECT_DATA =
+      (SERVER = DEDICATED)
+      (SERVICE_NAME = xepdb1 )
+    )
+  )
+EOF
+        chown oracle $EFS_MOUNT_POINT/oracle/network/admin/tnsnames.ora
+        chmod -R o+r $EFS_MOUNT_POINT/oracle
+        chmod 644 $EFS_MOUNT_POINT/oracle/network/admin/tnsnames.ora
+
         yum -y install oracle-database-xe-18c-1.0-1.x86_64.rpm
 
         (echo "password"; echo "password";) | /etc/init.d/oracle-xe-18c configure

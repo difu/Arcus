@@ -67,7 +67,7 @@ To create and modify the infrastructure `Terraform <https://www.terraform.io/>`_
     }
 
 
-- Create a S3 bucket where Arcus stores its internal components etc. and name it like *my_internal_bucket*. Note that this bucket name must have an unique name. Remember that name as it is needed when you want to deploy the infrastructure.
+- Create an S3 bucket where Arcus stores its internal components etc. and name it like *my_internal_bucket*. Note that this bucket name must have an unique name. Remember that name as it is needed when you want to deploy the infrastructure.
 - Download from Oracle OTN
 
   - oracle-instantclient18.3-basic-18.3.0.0.0-1.x86_64.rpm
@@ -78,8 +78,6 @@ To create and modify the infrastructure `Terraform <https://www.terraform.io/>`_
 
 - Creation of infrastructure
 
-Enter
-
  ``terraform init``
 
  ``terraform import aws_s3_bucket.internal_bucket`` *my_internal_bucket_name*
@@ -87,9 +85,10 @@ Enter
  ``terraform apply -var arcus_internal_bucket_name =`` *my_internal_bucket_name*
 
 For further configuration see the ``variables.tf`` file in the terraform folder.
+
 - Destruction of infrastructure
 
- ``terraform import aws_s3_bucket.internal_bucket`` *my_internal_bucket_name*
+ ``terraform state rm aws_s3_bucket.internal_bucket``
 
  ``terraform destroy``
 

@@ -74,11 +74,6 @@ resource "aws_autoscaling_group" "grib-parse-cluster-asg" {
 
   tags = [
     {
-      key                 = "${var.project} grib parse node"
-      value               = "value1"
-      propagate_at_launch = true
-    },
-    {
       key                 = "project"
       value               = "${var.project}"
       propagate_at_launch = true

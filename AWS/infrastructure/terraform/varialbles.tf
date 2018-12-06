@@ -110,6 +110,11 @@ variable "create_grib_parse_cluster" {
   default = false
 }
 
+variable "create_geoserver_cluster" {
+  description = "If set to 1, create a geoserver cluster"
+  default = false
+}
+
 variable "deploy_lambda_convert_grib2geotiff" {
   description = "If set to 1, deploy grib2geotiff lambda"
   default = false

@@ -157,6 +157,13 @@ resource "aws_security_group" "arcus-public-http" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
+   ingress {
+    from_port   = "80"
+    to_port     = "80"
+    protocol    = "6"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
   tags {
     name    = "${var.project} Public http Egress"
     project = "${var.project}"

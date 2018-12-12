@@ -19,6 +19,8 @@ else
 fi
 
 yum upgrade -y
+yum install -y git
+yum -y groupinstall "Development Tools"
 
 
 REGION=`wget -qO- http://instance-data/latest/meta-data/placement/availability-zone | sed 's/.$//'`
@@ -46,6 +48,13 @@ array=( $SW )
 for i in "$${array[@]}" # $$ Terraform escaping
 do
     case $i in
+    docker)
+        yum install -y docker
+        service docker start
+        usermod -a -G docker ec2-user
+        curl -L "https://github.com/docker/compose/releases/download/1.23.1/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+        chmod +x /usr/local/bin/docker-compose
+        ;;
     eccodes)
         echo "Installing eccodes"
         yum install gcc -y

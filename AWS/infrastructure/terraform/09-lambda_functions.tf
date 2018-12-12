@@ -12,9 +12,14 @@ resource "aws_vpc_endpoint" "s3" {
   service_name = "com.amazonaws.eu-central-1.s3" # TODO: Replace with variable
   policy = <<POLICY
     {
+        "Version":"2008-10-17",
         "Statement": [
             {
-                "Action": "*","Effect": "Allow","Resource": "*","Principal": "*"
+                "Action": "*",
+                "Effect": "Allow",
+                "Resource": "*",
+                "Principal": "*"
+
             }
         ]
     }

@@ -1,4 +1,5 @@
 resource "aws_launch_configuration" "geoserver_cluster-lc" {
+  count = "${var.create_geoserver_cluster}"
   image_id             = "${data.aws_ami.amazonlinux.image_id}"
   instance_type        = "t2.micro"
   iam_instance_profile = "${aws_iam_instance_profile.arcus-instance-profile.id}"
@@ -58,6 +59,7 @@ resource "aws_autoscaling_group" "geoerver-autoscaling-group" {
 }
 
 resource "aws_autoscaling_policy" "geoserver-autopolicy-up" {
+  count = "${var.create_geoserver_cluster}"
   name = "geoserver-autopolicy-up"
   scaling_adjustment = 1
   adjustment_type = "ChangeInCapacity"
@@ -66,6 +68,7 @@ resource "aws_autoscaling_policy" "geoserver-autopolicy-up" {
 }
 
 resource "aws_cloudwatch_metric_alarm" "geoserver-cpualarm-up" {
+  count = "${var.create_geoserver_cluster}"
   alarm_name = "high-cpu-geoserver-cluster-node"
   comparison_operator = "GreaterThanOrEqualToThreshold"
   evaluation_periods = "2"
@@ -85,6 +88,7 @@ resource "aws_cloudwatch_metric_alarm" "geoserver-cpualarm-up" {
 }
 
 resource "aws_autoscaling_policy" "geoserver-autopolicy-down" {
+  count = "${var.create_geoserver_cluster}"
   name = "geoserver--autoplicy-down"
   scaling_adjustment = -1
   adjustment_type = "ChangeInCapacity"
@@ -93,6 +97,7 @@ resource "aws_autoscaling_policy" "geoserver-autopolicy-down" {
 }
 
 resource "aws_cloudwatch_metric_alarm" "geoserver-cpualarm-down" {
+  count = "${var.create_geoserver_cluster}"
   alarm_name = "low-cpu-geoserver-cluster-node"
   comparison_operator = "LessThanOrEqualToThreshold"
   evaluation_periods = "2"
@@ -144,6 +149,7 @@ resource "aws_elb" "elb_geoserver" {
 }
 
 resource "aws_lb_cookie_stickiness_policy" "cookie_stickness" {
+  count = "${var.create_geoserver_cluster}"
   name = "elb-cookiestickness-geoserver"
   load_balancer = "${aws_elb.elb_geoserver.id}"
   lb_port = 80

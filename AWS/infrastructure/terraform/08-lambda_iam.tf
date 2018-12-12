@@ -23,10 +23,34 @@ resource "aws_iam_role_policy_attachment" "AWSLambdaVPCAccessExecutionRole-role-
   policy_arn = "${data.aws_iam_policy.AWSLambdaVPCAccessExecutionRole.arn}"
 }
 
+resource "aws_iam_policy" "Arcus-internal-lambda-S3-read-write" {
+  name        = "arcus-lambda-read-write-S3"
+  path        = "/S3/"
+  description = "This policy allows a lambda to read-write S3 bucket"
+
+  policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "s3:Get*",
+        "s3:List*",
+        "s3:Put*"
+      ],
+      "Resource": "*"
+    }
+  ]
+}
+    EOF
+}
+
+
 resource "aws_iam_policy_attachment" "lambda-S3-read" {
   name       = "LambdaS3Read"
   roles      = ["${aws_iam_role.lambda_exec.name}"]
-  policy_arn = "${aws_iam_policy.Arcus-internal-S3-read.arn}"
+  policy_arn = "${aws_iam_policy.Arcus-internal-lambda-S3-read-write.arn}"
 }
 
 data "aws_iam_policy" "AWSLambdaVPCAccessExecutionRole" {

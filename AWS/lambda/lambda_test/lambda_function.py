@@ -4,8 +4,9 @@ from __future__ import print_function
 
 import urllib
 import boto3
+from botocore.client import Config
 
-s3 = boto3.client('s3')
+s3 = boto3.client('s3', 'eu-central-1', config=Config(s3={'addressing_style': 'path'}))
 
 
 def lambda_handler(event, context):

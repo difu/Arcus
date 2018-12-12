@@ -23,6 +23,12 @@ resource "aws_iam_role_policy_attachment" "AWSLambdaVPCAccessExecutionRole-role-
   policy_arn = "${data.aws_iam_policy.AWSLambdaVPCAccessExecutionRole.arn}"
 }
 
+resource "aws_iam_policy_attachment" "lambda-S3-read" {
+  name       = "LambdaS3Read"
+  roles      = ["${aws_iam_role.lambda_exec.name}"]
+  policy_arn = "${aws_iam_policy.Arcus-internal-S3-read.arn}"
+}
+
 data "aws_iam_policy" "AWSLambdaVPCAccessExecutionRole" {
   arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole"
 }

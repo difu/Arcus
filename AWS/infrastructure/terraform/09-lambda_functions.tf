@@ -7,8 +7,27 @@ resource "aws_lambda_permission" "allow_bucket" {
   source_arn    = "${aws_s3_bucket.internal_bucket.arn}"
 }
 
+resource "aws_vpc_endpoint" "s3" {
+  vpc_id       = "${aws_vpc.arcus.id}"
+  service_name = "com.amazonaws.eu-central-1.s3" # TODO: Replace with variable
+  policy = <<POLICY
+    {
+        "Statement": [
+            {
+                "Action": "*","Effect": "Allow","Resource": "*","Principal": "*"
+            }
+        ]
+    }
+    POLICY
+}
+
+resource "aws_vpc_endpoint_route_table_association" "private_s3" {
+  vpc_endpoint_id = "${aws_vpc_endpoint.s3.id}"
+  route_table_id  = "${aws_route_table.public.id}"
+}
+
 resource "aws_lambda_function" "lambda_grib2geotiff" {
-  function_name = "ServerlessExample"
+  function_name = "Grib2Geotiff"
   count = "${var.deploy_lambda_convert_grib2geotiff}"
   s3_bucket = "${var.arcus_internal_bucket_name}"
   s3_key    = "lambda/lambda_grib2geotiff.zip"

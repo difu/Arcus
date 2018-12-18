@@ -147,7 +147,3 @@ resource "aws_lambda_permission" "apigw" {
   # within the API Gateway "REST API".
   source_arn = "${aws_api_gateway_deployment.rasterblaster_deployment.execution_arn}/*/*"
 }
-
-output "base_url" {
-  value = "${aws_api_gateway_deployment.rasterblaster_deployment.invoke_url}"
-}

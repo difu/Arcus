@@ -47,9 +47,8 @@ resource "aws_iam_policy" "Arcus-internal-lambda-S3-read-write" {
 }
 
 
-resource "aws_iam_policy_attachment" "lambda-S3-read-write" {
-  name       = "LambdaS3Read"
-  roles      = ["${aws_iam_role.lambda_exec.name}"]
+resource "aws_iam_role_policy_attachment" "lambda-S3-read-write" {
+  role      = "${aws_iam_role.lambda_exec.name}"
   policy_arn = "${aws_iam_policy.Arcus-internal-lambda-S3-read-write.arn}"
 }
 

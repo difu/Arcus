@@ -57,7 +57,8 @@ To create and modify the infrastructure `Terraform <https://www.terraform.io/>`_
                 "elasticmapreduce:DescribeCluster",
                 "elasticmapreduce:TerminateJobFlows",
                 "lambda:AddPermission",
-                "lambda:RemovePermission"
+                "lambda:RemovePermission",
+                "apigateway:*"
             ],
             "Resource": [
                 "*"

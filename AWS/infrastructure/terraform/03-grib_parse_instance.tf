@@ -80,7 +80,7 @@ resource "aws_autoscaling_group" "grib-parse-cluster-asg" {
     },
     {
       key                 = "software"
-      value               = "oracleclient eccodes gdal"
+      value               = "oracleclient eccodes docker gdal"
       propagate_at_launch = true
     },
   ]

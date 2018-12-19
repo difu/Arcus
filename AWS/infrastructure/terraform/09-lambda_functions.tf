@@ -74,7 +74,8 @@ data "archive_file" "lambda_api_gw_test" {
 }
 
 resource "aws_lambda_function" "test_api_gw-lambda" {
-  filename = "${data.archive_file.lambda_api_gw_test.output_path}"
+  s3_bucket = "${var.arcus_internal_bucket_name}"
+  s3_key    = "lambda/lambda_gdal.zip"
   function_name = "test_api_gw-lambda"
   role = "${aws_iam_role.lambda_exec.arn}"
   handler = "lambda_function.lambda_handler"

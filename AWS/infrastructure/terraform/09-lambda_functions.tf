@@ -67,20 +67,30 @@ resource "aws_s3_bucket_notification" "bucket_notification_new_object" {
   }
 }
 
-data "archive_file" "lambda_api_gw_test" {
+data "archive_file" "val_at_coord_zip" {
   type = "zip"
-  source_file = "../../lambda/test_api_gw/lambda_function.py"
-  output_path = "lambda_api_gw_test.zip"
+  source_file = "../../lambda/get_value_at_coord/get_value_at_coord.py"
+  output_path = "get_value_at_coord.zip"
 }
 
-resource "aws_lambda_function" "test_api_gw-lambda" {
-  s3_bucket = "${var.arcus_internal_bucket_name}"
-  s3_key    = "lambda/lambda_gdal.zip"
-  function_name = "rasterblaster"
+resource "aws_lambda_function" "val_at_coord" {
+  filename = "${data.archive_file.val_at_coord_zip.output_path}"
+  function_name = "val_at_coord"
   role = "${aws_iam_role.lambda_exec.arn}"
-  handler = "lambda_function.lambda_handler"
+  handler = "get_value_at_coord.lambda_handler"
   runtime = "python3.6"
-  #source_code_hash = "${base64sha256(file(data.archive_file.lambda_api_gw_test.output_path))}"
+  layers = [
+    "${aws_lambda_layer_version.gdal_layer.id}"
+  ]
+  source_code_hash = "${base64sha256(file("../../lambda/get_value_at_coord/get_value_at_coord.py"))}"
+}
+
+resource "aws_lambda_layer_version" "gdal_layer" {
+  s3_bucket = "${var.arcus_internal_bucket_name}"
+  s3_key    = "lambda/gdal-layer.zip"
+  layer_name = "gdal-layer"
+
+  compatible_runtimes = ["python3.6"]
 }
 
 resource "aws_api_gateway_rest_api" "rasterblaster" {
@@ -109,7 +119,7 @@ resource "aws_api_gateway_integration" "lambda" {
 
   integration_http_method = "POST"
   type                    = "AWS_PROXY"
-  uri                     = "${aws_lambda_function.test_api_gw-lambda.invoke_arn}"
+  uri                     = "${aws_lambda_function.val_at_coord.invoke_arn}"
 }
 
 resource "aws_api_gateway_method" "proxy_root" {
@@ -126,7 +136,7 @@ resource "aws_api_gateway_integration" "lambda_root" {
 
   integration_http_method = "POST"
   type                    = "AWS_PROXY"
-  uri                     = "${aws_lambda_function.test_api_gw-lambda.invoke_arn}"
+  uri                     = "${aws_lambda_function.val_at_coord.invoke_arn}"
 }
 
 resource "aws_api_gateway_method_response" "200" {
@@ -157,7 +167,7 @@ resource "aws_api_gateway_deployment" "rasterblaster_deployment" {
 resource "aws_lambda_permission" "apigw" {
   statement_id  = "AllowAPIGatewayInvoke"
   action        = "lambda:InvokeFunction"
-  function_name = "${aws_lambda_function.test_api_gw-lambda.arn}"
+  function_name = "${aws_lambda_function.val_at_coord.arn}"
   principal     = "apigateway.amazonaws.com"
 
   # The /*/* portion grants access from any method on any resource

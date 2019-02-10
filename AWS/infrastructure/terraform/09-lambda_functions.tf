@@ -85,6 +85,7 @@ resource "aws_lambda_function" "test_api_gw-lambda" {
 
 resource "aws_api_gateway_rest_api" "rasterblaster" {
   name        = "RasterBlaster"
+  binary_media_types = ["*/*"]
   description = "Allows REST based access on raster data"
 }
 
@@ -126,6 +127,21 @@ resource "aws_api_gateway_integration" "lambda_root" {
   integration_http_method = "POST"
   type                    = "AWS_PROXY"
   uri                     = "${aws_lambda_function.test_api_gw-lambda.invoke_arn}"
+}
+
+resource "aws_api_gateway_method_response" "200" {
+  rest_api_id = "${aws_api_gateway_rest_api.rasterblaster.id}"
+  resource_id = "${aws_api_gateway_resource.proxy.id}"
+  http_method = "${aws_api_gateway_method.proxy.http_method}"
+  status_code = "200"
+}
+
+resource "aws_api_gateway_integration_response" "MyDemoIntegrationResponse" {
+  rest_api_id = "${aws_api_gateway_rest_api.rasterblaster.id}"
+  resource_id = "${aws_api_gateway_resource.proxy.id}"
+  http_method = "${aws_api_gateway_method.proxy.http_method}"
+  status_code = "${aws_api_gateway_method_response.200.status_code}"
+  content_handling = "CONVERT_TO_BINARY"
 }
 
 resource "aws_api_gateway_deployment" "rasterblaster_deployment" {

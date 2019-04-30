@@ -12,7 +12,8 @@ def lambda_handler(event, context):
     print(os.environ['LD_LIBRARY_PATH'])
     gdal.SetConfigOption('GDAL_PAM_ENABLED', 'NO')
     #filename="s3://landsat-pds/L8/001/002/LC80010022016230LGN00/LC80010022016230LGN00_B3.TIF"
-    fname = filename.replace('s3://', '/vsis3/')
+    fname = event["queryStringParameters"]['filename']
+    fname = fname.replace('s3://', '/vsis3/')
     #
     ds = gdal.Open(fname, gdal.GA_ReadOnly)
     #    print(ds, ds.RasterCount)

@@ -73,6 +73,12 @@ data "archive_file" "val_at_coord_zip" {
   output_path = "get_value_at_coord.zip"
 }
 
+data "archive_file" "get_time_series_zip" {
+  type = "zip"
+  source_file = "../../lambda/get_time_series/get_time_series.py"
+  output_path = "get_time_series.zip"
+}
+
 resource "aws_lambda_function" "val_at_coord" {
   filename = "${data.archive_file.val_at_coord_zip.output_path}"
   function_name = "val_at_coord"
@@ -83,6 +89,18 @@ resource "aws_lambda_function" "val_at_coord" {
     "${aws_lambda_layer_version.gdal_layer.id}"
   ]
   source_code_hash = "${base64sha256(file("../../lambda/get_value_at_coord/get_value_at_coord.py"))}"
+}
+
+resource "aws_lambda_function" "get_time_series" {
+  filename = "${data.archive_file.get_time_series_zip.output_path}"
+  function_name = "get_time_series"
+  role = "${aws_iam_role.lambda_exec.arn}"
+  handler = "get_time_series.lambda_handler"
+  runtime = "python3.6"
+  layers = [
+    "${aws_lambda_layer_version.gdal_layer.id}"
+  ]
+  source_code_hash = "${base64sha256(file("../../lambda/get_time_series/get_time_series.py"))}"
 }
 
 resource "aws_lambda_layer_version" "gdal_layer" {
@@ -102,7 +120,20 @@ resource "aws_api_gateway_rest_api" "rasterblaster" {
 resource "aws_api_gateway_resource" "proxy" {
   rest_api_id = "${aws_api_gateway_rest_api.rasterblaster.id}"
   parent_id   = "${aws_api_gateway_rest_api.rasterblaster.root_resource_id}"
-  path_part   = "{proxy+}"
+  path_part   = "get_value_at_coord"
+}
+
+resource "aws_api_gateway_resource" "gw_resource_get_time_series" {
+  rest_api_id = "${aws_api_gateway_rest_api.rasterblaster.id}"
+  parent_id   = "${aws_api_gateway_rest_api.rasterblaster.root_resource_id}"
+  path_part   = "get_time_series"
+}
+
+resource "aws_api_gateway_method" "gw_method_get_time_series" {
+  rest_api_id   = "${aws_api_gateway_rest_api.rasterblaster.id}"
+  resource_id   = "${aws_api_gateway_resource.gw_resource_get_time_series.id}"
+  http_method   = "ANY"
+  authorization = "NONE"
 }
 
 resource "aws_api_gateway_method" "proxy" {
@@ -122,14 +153,24 @@ resource "aws_api_gateway_integration" "lambda" {
   uri                     = "${aws_lambda_function.val_at_coord.invoke_arn}"
 }
 
-resource "aws_api_gateway_method" "proxy_root" {
+resource "aws_api_gateway_integration" "gw_integration_get_time_series" {
+  rest_api_id = "${aws_api_gateway_rest_api.rasterblaster.id}"
+  resource_id = "${aws_api_gateway_method.gw_method_get_time_series.resource_id}"
+  http_method = "${aws_api_gateway_method.gw_method_get_time_series.http_method}"
+
+  integration_http_method = "POST"
+  type                    = "AWS_PROXY"
+  uri                     = "${aws_lambda_function.get_time_series.invoke_arn}"
+}
+
+/*resource "aws_api_gateway_method" "proxy_root" {
   rest_api_id   = "${aws_api_gateway_rest_api.rasterblaster.id}"
   resource_id   = "${aws_api_gateway_rest_api.rasterblaster.root_resource_id}"
   http_method   = "ANY"
   authorization = "NONE"
-}
+}*/
 
-resource "aws_api_gateway_integration" "lambda_root" {
+/*resource "aws_api_gateway_integration" "lambda_root" {
   rest_api_id = "${aws_api_gateway_rest_api.rasterblaster.id}"
   resource_id = "${aws_api_gateway_method.proxy_root.resource_id}"
   http_method = "${aws_api_gateway_method.proxy_root.http_method}"
@@ -137,13 +178,20 @@ resource "aws_api_gateway_integration" "lambda_root" {
   integration_http_method = "POST"
   type                    = "AWS_PROXY"
   uri                     = "${aws_lambda_function.val_at_coord.invoke_arn}"
-}
+}*/
 
 resource "aws_api_gateway_method_response" "200" {
   rest_api_id = "${aws_api_gateway_rest_api.rasterblaster.id}"
   resource_id = "${aws_api_gateway_resource.proxy.id}"
   http_method = "${aws_api_gateway_method.proxy.http_method}"
   status_code = "200"
+
+  response_parameters {
+    "method.response.header.Access-Control-Allow-Headers" = true
+    "method.response.header.Access-Control-Allow-Methods" = true
+    "method.response.header.Access-Control-Allow-Origin"  = true
+  }
+
 }
 
 resource "aws_api_gateway_integration_response" "MyDemoIntegrationResponse" {
@@ -157,7 +205,7 @@ resource "aws_api_gateway_integration_response" "MyDemoIntegrationResponse" {
 resource "aws_api_gateway_deployment" "rasterblaster_deployment" {
   depends_on = [
     "aws_api_gateway_integration.lambda",
-    "aws_api_gateway_integration.lambda_root",
+    "aws_api_gateway_integration.gw_integration_get_time_series",
   ]
 
   rest_api_id = "${aws_api_gateway_rest_api.rasterblaster.id}"
@@ -172,6 +220,17 @@ resource "aws_lambda_permission" "apigw" {
 
   # The /*/* portion grants access from any method on any resource
   # within the API Gateway "REST API".
+  source_arn = "${aws_api_gateway_deployment.rasterblaster_deployment.execution_arn}/*/*"
+}
+
+resource "aws_lambda_permission" "lambda_permission" {
+  statement_id  = "AllowMyDemoAPIInvoke"
+  action        = "lambda:InvokeFunction"
+  function_name = "${aws_lambda_function.get_time_series.arn}"
+  principal     = "apigateway.amazonaws.com"
+
+  # The /*/*/* part allows invocation from any stage, method and resource path
+  # within API Gateway REST API.
   source_arn = "${aws_api_gateway_deployment.rasterblaster_deployment.execution_arn}/*/*"
 }
 
